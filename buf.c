@@ -3,12 +3,14 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #define INITIAL_SIZE 1 // must be at least 1
 
-#define PANIC(val) { \
-    if(val) \
+#define PANIC(err) { \
+    if(err) \
     { \
+        fprintf(stderr, "ERROR: %s\n", err); \
         exit(EXIT_FAILURE); \
     } \
 }
@@ -22,22 +24,29 @@ struct buf
     size_t size;
 };
 
-char * buf_init(struct buf * self, size_t item_size)
+char * buf_init(struct buf * * self, size_t item_size)
 {
-    self->mem = malloc(item_size * INITIAL_SIZE);
-    if(!self->mem)
+    struct buf * s = malloc(sizeof(struct buf));
+    if(!s)
+    {
+        return "malloc failure";
+    }
+    * self = s;
+
+    s->mem = malloc(item_size * INITIAL_SIZE);
+    if(!s->mem)
     {
         return "malloc failure";
     }
 
-    self->item_size = item_size;
-    self->len = 0;
-    self->size = INITIAL_SIZE;
+    s->item_size = item_size;
+    s->len = 0;
+    s->size = INITIAL_SIZE;
 
     return NULL;
 }
 
-void buf_init$(struct buf * self, size_t item_size)
+void buf_init$(struct buf * * self, size_t item_size)
 {
     PANIC(buf_init(self, item_size));
 }

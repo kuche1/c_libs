@@ -6,8 +6,9 @@
 
 struct buf;
 
-char * buf_init (struct buf * self, size_t item_size);
-void   buf_init$(struct buf * self, size_t item_size);
+char * buf_init (struct buf * * self, size_t item_size);
+void   buf_init$(struct buf * * self, size_t item_size);
+// pointer to private data will be written to `* self`
 
 void buf_deinit(struct buf * self);
 
