@@ -1,9 +1,15 @@
 #! /usr/bin/env bash
 
 {
+    # https://renenyffenegger.ch/notes/development/languages/C-C-plus-plus/GCC/create-libraries/index
+
     set -euo pipefail
 
-    # https://renenyffenegger.ch/notes/development/languages/C-C-plus-plus/GCC/create-libraries/index
+    ME=$(readlink -f -- "${BASH_SOURCE[0]}")
+    HERE=$(dirname -- "$ME")
+
+    IN="$HERE"
+    OUT="$HERE/out"
 
     COMPILER='gcc'
     COMPILER_FLAGS='-std=c99' # standard
@@ -19,14 +25,22 @@
 
     function compile_and_test()
     {
-        test $# = 1
-        local name=$1
+        set -euo pipefail
 
-        $CHECK $name.c $name.h
-        $COMP_LIB_SHARED -o $name.so $name.c
-        $COMP -o ${name}_test ${name}_test.c $name.h $name.so
-        ./buf_test
+        test $# = 1
+        local name="$1"
+
+        local in="$IN/$name"
+        local out="$OUT/$name"
+
+        $CHECK "$in.c" "$in.h"
+        $COMP_LIB_SHARED -o "$out.so" "$in.c"
+
+        $COMP -o "${out}_test" "${in}_test.c" "$in.h" "$out.so"
+        "${out}_test"
     }
 
+    shellcheck "$ME"
+    mkdir -p "$OUT"
     compile_and_test buf
 }
