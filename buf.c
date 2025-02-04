@@ -7,13 +7,14 @@
 
 #define INITIAL_SIZE 1 // must be at least 1
 
-#define PANIC(err) { \
-    if(err) \
+#define PANIC(err) \
     { \
-        fprintf(stderr, "ERROR: %s\n", err); \
-        exit(EXIT_FAILURE); \
-    } \
-}
+        if(err) \
+        { \
+            fprintf(stderr, "ERROR: %s\n", err); \
+            exit(EXIT_FAILURE); \
+        } \
+    }
 
 struct buf
 {
