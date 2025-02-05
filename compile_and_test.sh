@@ -46,5 +46,5 @@
     mkdir -p "$OUT"
     compile_and_test buf
     # compile_and_test net # unfinished
-    # compile_and_test com # unfinished
+    compile_and_test com # unfinished
 }

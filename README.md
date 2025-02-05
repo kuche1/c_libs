@@ -19,6 +19,15 @@ an error)
 (just an idea) if there is an errno it always needs to be printed or\
 included in the returned string
 
+(TODO) make another library that wraps around stdandard functions\
+and checks for errno and prints that errno (and then maybe we could\
+use enums for errors)
+
+(TODO) maybe use "error level" which translates to "at which level do we\
+want to propagate errors", something like 0(never panic) 1(panic but only when\
+errors are theoretically impossible) 2(panic when the programmer made a mistake)\
+3(always panic)
+
 ### includes
 
 includes are ordered by length

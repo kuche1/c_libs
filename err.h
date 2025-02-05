@@ -13,10 +13,12 @@
         } \
     }
 
+/*
 #define CRITICAL(info) \
     { \
         fprintf(stderr, "CRITICAL ERROR: %s\n", info); \
         exit(EXIT_FAILURE); \
     }
+*/
 
 #endif

@@ -41,7 +41,7 @@ char * buf_init(struct buf * * self, size_t item_size)
 
 void buf_init$(struct buf * * self, size_t item_size)
 {
-    PANIC(buf_init(self, item_size));
+    PANICIF(buf_init(self, item_size));
 }
 
 void buf_deinit(struct buf * self)
@@ -71,7 +71,7 @@ char * buf_append(struct buf * self, void * * item)
 
 void buf_append$(struct buf * self, void * * item)
 {
-    PANIC(buf_append(self, item));
+    PANICIF(buf_append(self, item));
 }
 
 char * buf_remove(struct buf * self, size_t idx)
@@ -95,7 +95,7 @@ char * buf_remove(struct buf * self, size_t idx)
 
 void buf_remove$(struct buf * self, size_t idx)
 {
-    PANIC(buf_remove(self, idx));
+    PANICIF(buf_remove(self, idx));
 }
 
 size_t buf_len(struct buf * self)
@@ -117,7 +117,7 @@ char * buf_get(struct buf * self, size_t idx, void * * item)
 
 void buf_get$(struct buf * self, size_t idx, void * * item)
 {
-    PANIC(buf_get(self, idx, item));
+    PANICIF(buf_get(self, idx, item));
 }
 
 void * buf_get_arr(struct buf * self)

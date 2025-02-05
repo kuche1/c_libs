@@ -13,14 +13,14 @@ struct com
     pthread_mutex_t inbox_lock;
 };
 
-char * com_init(struct com * * self)
+enum com_init$pln$err com_init$pln(struct com * * self)
 {
-    char * err = "com_init: unreachable";
+    enum com_init$pln$err err = -1;
 
     struct com * s = malloc(sizeof(struct com));
     if(!s)
     {
-        err = "com_init: malloc failure";
+        err = COM_INIT$PLN$ERR_MALLOC;
         goto err_malloc;
     }
     * self = s;
@@ -28,28 +28,56 @@ char * com_init(struct com * * self)
     s->inbox_eventfd = eventfd(0, EFD_NONBLOCK);
     if(s->inbox_eventfd < 0)
     {
-        err = "com_init: eventfd failure";
+        err = COM_INIT$PLN$ERR_EVENTFD;
         goto err_eventfd;
     }
 
     if(pthread_mutex_init(& s->inbox_lock, NULL))
     {
-        err = "com_init: pthread_mutex_init failure";
+        err = COM_INIT$PLN$ERR_MUTEX_INIT;
         goto err_mutex;
     }
 
     return NULL;
 
-    pthread_mutex_destroy(& s->inbox_lock);
+    if(pthread_mutex_destroy(& s->inbox_lock))
+    {
+        err = COM_INIT$PLN$ERR_ERR_MUTEX_CLOSE;
+    }
 err_mutex:
 
-    close(s->inbox_eventfd);
+    if(close(s->inbox_eventfd))
+    {
+        err = COM_INIT$PLN$ERR_ERR_CLOSE;
+    }
 err_eventfd:
 
     free(s);
 err_malloc:
 
     return err;
+}
+
+enum com_init$plti$err com_init$plti(struct com * * self)
+{
+    switch(com_init$pln(self))
+    {
+        case COM_INIT$PLN$ERR_NONE:
+            return COM_INIT$PLTI$ERR_NONE;
+        
+        case COM_INIT$PLN$ERR_MALLOC:
+            return COM_INIT$PLTI$ERR_MALLOC;
+
+        case COM_INIT$PLN$ERR_EVENTFD:
+            return COM_INIT$PLTI$ERR_EVENTFD;
+
+        case COM_INIT$PLTI$ERR_MUTEX_INIT:
+        case COM_INIT$PLN$ERR_ERR_MUTEX_DEINIT:
+        case COM_INIT$PLN$ERR_ERR_CLOSE:
+            PANIC();
+    }
+
+    return -1;
 }
 
 void com_init$(struct com * * self)
@@ -79,40 +107,49 @@ void com_deinit$(struct com * self)
     PANIC(com_deinit(self));
 }
 
-char * com_send_raw(struct com * self, struct com * other, uint64_t msg)
+enum com_send_raw_err com_send_raw(struct com * self, struct com * other, uint64_t msg)
 {
-    char * err = "com_send_raw: unreachable";
+    enum com_send_raw_err err = -1;
 
     if(pthread_mutex_lock(& other->inbox_lock))
     {
-        err = "com_send_raw: could not acquire inbox lock";
+        err = CON_SEND_RAW_ERR_LOCK;
         goto err_lock;
     }
 
     ssize_t sz = write(other->inbox_eventfd, & msg, sizeof(msg));
     if(sz < 0)
     {
-        err = "com_send_raw: write failure";
+        err = CON_SEND_RAW_ERR_WRITE;
         goto err_write;
     }
     if(sz != sizeof(msg))
     {
-        err = "com_send_raw: assertion failed: sz != sizeof(msg)"
+        err = CON_SEND_RAW_ERR_WRITE_NOT_FULL;
         goto err_write;
     }
 
     if(pthread_mutex_unlock(& other->inbox_lock))
     {
-        CRITICAL("com_send_raw: could not unlock inbox lock");
+        err = CON_SEND_RAW_ERR_UNLOCK;
+        goto err_unlock;
     }
 
+    return COM_SEND_RAW_ERR_NONE;
+
+err_unlock:
 err_write:
 
     if(pthread_mutex_unlock(& other->inbox_lock))
     {
-        CRITICAL("com_send_raw: could not unlock inbox lock during the handling of another error");
+        err = CON_SEND_RAW_ERR_UNLOCK_DURING_ERR;
     }
 err_lock:
 
     return err;
+}
+
+void com_send_raw$(struct com * self, struct com * other, uint64_t msg)
+{
+    PANICIF(com_send_raw(self, other, msg));
 }
