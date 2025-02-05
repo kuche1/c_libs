@@ -13,10 +13,10 @@
 
     COMPILER='gcc'
     COMPILER_FLAGS='-std=c99' # standard
-    COMPILER_FLAGS="$COMPILER_FLAGS -Werror -Wextra -Wall -pedantic" # strict
-    COMPILER_FLAGS="$COMPILER_FLAGS -Wfatal-errors" # stop on first encountered error
-    COMPILER_FLAGS="$COMPILER_FLAGS -Wshadow" # shadow variables
-    COMPILER_FLAGS="$COMPILER_FLAGS -fwrapv" # make signed integer operations defined
+    COMPILER_FLAGS+=" -Werror -Wextra -Wall -pedantic" # strict
+    COMPILER_FLAGS+=" -Wfatal-errors" # stop on first encountered error
+    COMPILER_FLAGS+=" -Wshadow" # shadow variables
+    COMPILER_FLAGS+=" -fwrapv" # make signed integer operations defined
 
     COMP="$COMPILER $COMPILER_FLAGS"
     COMP_LIB_SHARED="$COMP -c -fPIC"
@@ -33,7 +33,9 @@
         local in="$IN/$name"
         local out="$OUT/$name"
 
-        $CHECK "$in.c" "$in.h"
+        local additional_deps='err.h' # not really needed since it's only a header file
+
+        $CHECK "$in.c" "$in.h" $additional_deps
         $COMP_LIB_SHARED -o "$out.so" "$in.c"
 
         $COMP -o "${out}_test" "${in}_test.c" "$in.h" "$out.so"
@@ -43,4 +45,6 @@
     shellcheck "$ME"
     mkdir -p "$OUT"
     compile_and_test buf
+    # compile_and_test net # unfinished
+    # compile_and_test com # unfinished
 }

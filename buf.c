@@ -1,20 +1,12 @@
 
 #include "buf.h"
 
+#include "err.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 #define INITIAL_SIZE 1 // must be at least 1
-
-#define PANIC(err) \
-    { \
-        if(err) \
-        { \
-            fprintf(stderr, "ERROR: %s\n", err); \
-            exit(EXIT_FAILURE); \
-        } \
-    }
 
 struct buf
 {
@@ -30,14 +22,14 @@ char * buf_init(struct buf * * self, size_t item_size)
     struct buf * s = malloc(sizeof(struct buf));
     if(!s)
     {
-        return "malloc failure";
+        return "buf_init: malloc failure";
     }
     * self = s;
 
     s->mem = malloc(item_size * INITIAL_SIZE);
     if(!s->mem)
     {
-        return "malloc failure";
+        return "buf_init: malloc failure";
     }
 
     s->item_size = item_size;
@@ -64,7 +56,7 @@ char * buf_append(struct buf * self, void * * item)
         void * new = realloc(self->mem, self->item_size * self->size * 2);
         if(!new)
         {
-            return "relloc failure";
+            return "buf_append: relloc failure";
         }
 
         self->mem = new;
@@ -86,7 +78,7 @@ char * buf_remove(struct buf * self, size_t idx)
 {
     if(idx >= self->len)
     {
-        return "invalid index";
+        return "buf_remove: invalid index";
     }
 
     if((self->len >= 2) && (idx != self->len - 1)){
@@ -115,7 +107,7 @@ char * buf_get(struct buf * self, size_t idx, void * * item)
 {
     if(idx >= self->len)
     {
-        return "invalid index";
+        return "buf_get: invalid index";
     }
 
     * item = & self->mem[self->item_size * idx];
